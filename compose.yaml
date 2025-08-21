@@ -19,7 +19,7 @@ services:
   db:
     image: postgres
     volumes:
-      - pgsql-db:/var/lib/pgsql
+      - pgsql-db:/var/lib/postgresql/data
     restart: always
     # set shared memory limit when using docker compose
     shm_size: 128mb
@@ -30,7 +30,7 @@ services:
     #    tmpfs:
     #      size: 134217728 # 128*2^20 bytes = 128Mb
     ports:
-      - 5432:5432
+      - 6432:5432
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: qbeep
