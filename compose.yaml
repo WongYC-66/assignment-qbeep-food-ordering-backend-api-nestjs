@@ -2,12 +2,24 @@
 
 services:
 
-  # todo: add dockerfile & service here for BE
-  
+  # todo: add dockerfile & service here for BE , https://docs.docker.com/compose/gettingstarted/
+  qbeep-app:
+    build: .
+    ports:  
+      - "3000:3000"
+    develop:
+      watch:
+        - path: ./
+          action: sync
+          target: /app/
+        - path: ./package.json
+          action: rebuild
 
-  # postgresql DB
+  # postgresql DB  ,  https://hub.docker.com/_/postgres
   db:
     image: postgres
+    volumes:
+      - pgsql-db:/var/lib/pgsql
     restart: always
     # set shared memory limit when using docker compose
     shm_size: 128mb
@@ -29,3 +41,6 @@ services:
     restart: always
     ports:
       - 8080:8080
+
+volumes:
+  pgsql-db:
