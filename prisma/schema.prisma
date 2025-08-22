@@ -13,7 +13,7 @@ datasource db {
 
 model User {
   id       Int      @id @default(autoincrement())
-  username String
+  username String   @unique
   password String
   role     String
   name     String
@@ -23,7 +23,7 @@ model User {
 
 model Outlet {
   id       Int     @id @default(autoincrement())
-  name     String
+  name     String  @unique
   owner    User    @relation(fields: [owner_id], references: [id])
   owner_id Int
   location String
@@ -41,6 +41,8 @@ model Food {
   price        Decimal
   image_url    String
   OrderedItems OrderedItems[]
+
+  @@unique([outlet_id, name]) 
 }
 
 model Order {
