@@ -44,9 +44,9 @@ POST /api/v1/orders
 - install node.js
 
 ### Usage
-1. git clone https://github.com/WongYC-66/assignment-qbeep-food-ordering-backend-api-nestjs
+1. run `git clone https://github.com/WongYC-66/assignment-qbeep-food-ordering-backend-api-nestjs`
 
-1. `cd assignment-qbeep-food-ordering-backend-api-nestjs`
+1. run `cd assignment-qbeep-food-ordering-backend-api-nestjs`
    
 2. open docker desktop/ docker engine
 
