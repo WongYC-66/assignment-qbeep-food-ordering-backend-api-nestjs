@@ -1,8 +1,9 @@
 
 // import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import { CreateCatDto } from './dto/create-cat.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ApiQuery } from '@nestjs/swagger';
 
 @Controller('api/v1')
 export class ApiController {
@@ -15,13 +16,41 @@ export class ApiController {
     }
 
     @Get("/outlets/:outlet_id")
-    getOutletById(@Param(":outlet_id") outlet_id: string) {
-        console.log(outlet_id)
-        return this.prisma.outlet.findFirst({
+    getOutletById(@Param("outlet_id") outlet_id: string) {
+        return this.prisma.outlet.findUnique({
             where: {
-                id: {
-                    equals: Number(outlet_id)
+                id: Number(outlet_id)
+            },
+            include: {
+                Food: true,
+            },
+        });
+    }
+
+    @Get("/foods")
+    getFoods() {
+        return this.prisma.food.findMany();
+    }
+
+    @ApiQuery({ name: 'id', required: false })
+    @ApiQuery({ name: 'name', required: false })
+    @Get("/foods/search")
+    getFoodById(@Query("id") food_id: string, @Query("name") name: string) {
+        console.log({ food_id, name })
+        if (food_id) {
+            return this.prisma.food.findUnique({
+                where: {
+                    id: Number(food_id)
                 }
+            });
+        }
+        if(!name) name = ''
+        return this.prisma.food.findMany({
+            where: {
+                OR: [
+                    { name: { contains: name, mode: 'insensitive' } },
+                    { description: { contains: name, mode: 'insensitive' } },
+                ],
             }
         });
     }
@@ -31,15 +60,6 @@ export class ApiController {
         return "todo: login user and return a simple token";
     }
 
-    @Get("/foods")
-    getFoods() {
-        return this.prisma.food.findMany();
-    }
-
-    @Get("/outlets/:outlet_id")
-    getFoodById() {
-        return "todo: return 1 food detail";
-    }
 
     @Get("/orders")
     getOrders() {
