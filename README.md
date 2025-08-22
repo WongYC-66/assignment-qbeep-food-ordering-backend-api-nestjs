@@ -53,6 +53,8 @@ POST /api/v1/orders
 3. run `npm install`
 
 4. run  `docker compose up`
+  - ensure docker desktop has these containers
+  - ![image4](./image4.png)
 
 5. run `npx prisma generate`
 
@@ -111,3 +113,7 @@ p/s : run `npx prisma studio` to check database (docker psql)
 - Each order has a totalPrice
 - Each order can only belongs to one user
    
+  
+![image3](./image3.png)
+![image2](./image2.png)
+![image1](./image1.png)
