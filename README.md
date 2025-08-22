@@ -2,6 +2,7 @@
 - This is an assignment task
 - A simple Backend Restful API, for simple food ordering apps
 - built with NestJS, postgresql, prisma, docker
+- docker compose : nestjs backend API, postgresql, db adminer
 
 API endpoints:
 ```
@@ -43,15 +44,27 @@ POST /api/v1/orders
 - install node.js
 
 ### Usage
-1. git clone link pls
-1. open docker desktop/ docker engine
-1. run `npm install`
-1. run  `docker compose up`
-2. run `npx prisma generate`
-3. run `npx prisma migrate dev`
-4. run `npx prisma db seed`
-5. access at http://localhost:3000/ or http://localhost:3000/api for Swagger API doc
+1. git clone https://github.com/WongYC-66/assignment-qbeep-food-ordering-backend-api-nestjs
 
+1. `cd assignment-qbeep-food-ordering-backend-api-nestjs`
+   
+2. open docker desktop/ docker engine
+
+3. run `npm install`
+
+4. run  `docker compose up`
+
+5. run `npx prisma generate`
+
+6. run `npx prisma migrate dev`
+
+7. run `npx prisma db seed` to fake-seed postgresql database
+
+8.  access at http://localhost:3000/ or http://localhost:3000/api for Swagger API doc
+
+p/s : host port of 3000/6432 would be used
+
+p/s : run `npx prisma studio` to check database (docker psql)
 
 
 # Assignments
