@@ -4,11 +4,15 @@ import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Query } 
 import { CreateCatDto } from './dto/create-cat.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ApiQuery } from '@nestjs/swagger';
+import { AuthService } from './auth.service';
 
 @Controller('api/v1')
 export class ApiController {
 
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private auth: AuthService
+    ) { }
 
     @Get("/outlets")
     getOutlets() {
@@ -27,14 +31,15 @@ export class ApiController {
         });
     }
 
-    @Get("/foods")
-    getFoods() {
-        return this.prisma.food.findMany();
-    }
+    // obsolete
+    // @Get("/foods")
+    // getFoods() {
+    //     return this.prisma.food.findMany();
+    // }
 
+    @Get("/foods")
     @ApiQuery({ name: 'id', required: false })
     @ApiQuery({ name: 'name', required: false })
-    @Get("/foods/search")
     getFoodById(@Query("id") food_id: string, @Query("name") name: string) {
         console.log({ food_id, name })
         if (food_id) {
@@ -44,7 +49,7 @@ export class ApiController {
                 }
             });
         }
-        if(!name) name = ''
+        if (!name) name = ''
         return this.prisma.food.findMany({
             where: {
                 OR: [
