@@ -1,10 +1,11 @@
 
 // import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Query } from '@nestjs/common';
-import { CreateCatDto } from './dto/create-cat.dto';
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Query, Req, Request, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { CreateOrderDto, LoginUserDto } from './dto/all.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ApiQuery } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
+import { AuthGuard } from './auth/auth.guard';
 
 @Controller('api/v1')
 export class ApiController {
@@ -15,8 +16,14 @@ export class ApiController {
     ) { }
 
     @Get("/outlets")
-    getOutlets() {
-        return this.prisma.outlet.findMany();
+    @ApiQuery({ name: 'name', required: false })
+    getOutlets(@Query('name') name: string) {
+        if (!name) name = ''
+        return this.prisma.outlet.findMany({
+            where: {
+                name: { contains: name, mode: 'insensitive' },
+            }
+        });
     }
 
     @Get("/outlets/:outlet_id")
@@ -61,61 +68,90 @@ export class ApiController {
     }
 
     @Post("/users/login")
-    postLogin() {
-        return "todo: login user and return a simple token";
+    signIn(@Body() loginUserDto: LoginUserDto) {
+        if (!loginUserDto) {
+            return "Please send in JSON of {username:..., password:...}"
+        }
+        return this.auth.signIn(loginUserDto.username, loginUserDto.password);
     }
 
-
+    @UseGuards(AuthGuard)
     @Get("/orders")
-    getOrders() {
-        return "todo: return all order accesible by user";
+    getOrders(@Request() req) {
+        const user = req.user
+        if (user.role === 'admin') {
+            //return all orders
+            return this.prisma.order.findMany()
+        }
+
+        if (user.role === 'user') {
+            return this.prisma.order.findMany({
+                where: {
+                    user_id: user.id
+                }
+            })
+        }
     }
 
+    @UseGuards(AuthGuard)
     @Get("/orders/:order_id")
-    getOrderById() {
-        return "todo: return one order accesible by user";
+    async getOrderById(@Request() req, @Param("order_id") order_id: string) {
+        const order = await this.prisma.order.findUnique({
+            where: {
+                id: Number(order_id)
+            },
+            include: {
+                OrderedItems: true
+            }
+        })
+
+        if (!order) {
+            return {}
+        }
+
+        const user = req.user
+        if (user.role !== 'admin' && order.user_id != Number(user.id)) {
+            throw new UnauthorizedException();
+        }
+
+        return order
     }
 
+    @UseGuards(AuthGuard)
     @Post("/orders")
-    postOneOrder() {
-        return "todo: make a new order by user";
+    async postOneOrder(@Request() req, @Body() dto: CreateOrderDto) {
+        // https://www.youtube.com/watch?v=QxyqR4yh1GI
+        // https://www.prisma.io/docs/orm/prisma-client/queries/crud#create
+        // 1. create Order 
+        // 2. create OrderedItems in bulk
+
+        const user = req.user
+        console.log(user)
+
+        const newOrder = await this.prisma.order.create({
+            data: {
+                user_id: Number(user.id),
+                outlet_id: Number(dto.outlet_id),
+                note: dto.note,
+                total_price: Number(dto.total_price),
+                created_at: new Date(),
+            },
+        });
+
+        // console.log(dto)
+
+        const ordered_foods = dto.ordered_foods.map(orderedItem => {
+            return {
+                order_id: newOrder.id,
+                quantity: Number(orderedItem.quantity),
+                food_id: Number(orderedItem.food_id),
+            }
+        })
+
+        await this.prisma.orderedItems.createMany({
+            data: ordered_foods
+        });
+
+        return { success: "order created" };
     }
-
-
-
-    // @Post()
-    // async create(@Body() createCatDto: CreateCatDto) {
-    //     // this.catsService.create(createCatDto);
-    // }
-
-    // @Get()
-    // async findAll(): Promise<Cat[]> {
-    //     throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-    //     // return this.catsService.findAll();
-    // }
-
-    // @Post()
-    // create(@Body() createCatDto: CreateCatDto) {
-    //     return 'This action adds a new cat';
-    // }
-
-    // @Get()
-    // findAll(@Query() query: ListAllEntities) {
-    //     return `This action returns all cats (limit: ${query.limit} items)`;
-    // }
-
-    // @Get(':id')
-    // findOne(@Param('id') id: string) {
-    //     return `This action returns a #${id} cat`;
-    // }
-
-    // @Put(':id')
-    // update(@Param('id') id: string, @Body() updateCatDto: UpdateCatDto) {
-    //     return `This action updates a #${id} cat`;
-    // }
-
-    // @Delete(':id')
-    // remove(@Param('id') id: string) {
-    //     return `This action removes a #${id} cat`;
-    // }
 }
