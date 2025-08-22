@@ -4,6 +4,8 @@ services:
 
   # todo: add dockerfile & service here for BE , https://docs.docker.com/compose/gettingstarted/
   qbeep-app:
+    environment:
+      DATABASE_URL: "postgresql://admin:qbeep@db:5432/qbeep_db?schema=public"
     build: .
     ports:  
       - "3000:3000"

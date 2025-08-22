@@ -1,6 +1,6 @@
 // https://www.prisma.io/blog/nestjs-prisma-rest-api-7D056s1BmOL0
 
-import { PrismaClient } from '../generated/prisma/index.js'
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
