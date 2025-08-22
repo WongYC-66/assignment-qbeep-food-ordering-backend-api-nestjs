@@ -75,6 +75,5 @@
   },
   "prisma": {
     "seed": "node ./prisma/seed"
-  },
-  "type": "module"
+  }
 }
